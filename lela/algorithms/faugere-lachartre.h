@@ -54,8 +54,35 @@ public:
 	FaugereLachartre (Context<Ring, Modules> &_ctx);
 
 	/** 
-	 * \brief Convert the matrix A into reduced
+	 * \brief Convert the matrix X into reduced
 	 * row-echelon form
+	 *
+	 * The input matrix X must have jagged upper diagonal shape,
+	 * which is to say that if a pivot appears in row r and column
+	 * c, then all rows below r must be 0 in all columns before
+	 * c. This is OK:
+	 *
+	 *  11111
+	 *  00001
+	 *  00001
+	 *
+	 * This is not OK:
+	 *
+	 *  11111
+	 *  00001
+	 *  00010
+	 *
+	 * To understand the function of option only_D, you need to
+	 * know that the matrix is split into sub-matrices A, B, C and
+	 * D in the shape
+	 *
+	 *   AB
+	 *   CD
+	 *
+	 * where A is an upper-triangular matrix that is as large as
+	 * possible. Rows and columns are permuted to achieve this,
+	 * though the columns of the output are put back into the
+	 * original order before the method returns. 
 	 *
 	 * @param R Matrix into which to store the reduced
 	 * row-echelon form. Should have the same dimensions
@@ -74,8 +101,11 @@ public:
 	 * @param reduced Whether to compute the reduced
 	 * row-echelon form (default true)
 	 *
-	 * @param only_D Whether to return only the rows of
-	 * the lower block (default false)
+	 * @param only_D Whether to return only the rows of the lower
+	 * block (default false). Here C will be zero and D will be
+	 * the schur complement of A, which is D-C*inv(A)*B. Note that
+	 * this is before the columns are permuted back to their
+	 * original order.
 	 */
 	template <class Matrix>
 	void echelonize (Matrix &R, const Matrix &X, size_t &rank, typename Ring::Element &det, bool reduced = true, bool only_D = false);
